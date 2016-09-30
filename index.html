@@ -1,0 +1,47 @@
+<style>
+
+
+.nodes circle {
+  stroke: #fff;
+  stroke-opacity: 1;
+  stroke-width: 3px;
+}
+
+path.link {
+  fill: none;
+  stroke: #666;
+}
+
+path.marker_only {
+  fill: none;
+  stroke: #666;
+}
+
+marker#licensing {
+  fill: green;
+}
+
+path.link.licensing {
+  stroke: green;
+}
+
+path.link.resolved {
+  stroke-dasharray: 0,2 1;
+}
+
+
+</style>
+
+<h1>hNet Testing</h1>
+
+<div id="option">
+    <input name="updateButton" 
+           type="button" 
+           value="Reset" 
+           onclick="loadNodes()" />
+</div>
+
+
+<script src="js/d3.min.js"></script>
+<script src="js/underscore.min.js"></script>
+<script src="js/netVis.js"></script>

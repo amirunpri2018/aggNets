@@ -1,0 +1,19 @@
+{
+  "nodes": [
+    {"id": "A"},
+    {"id": "B"},
+    {"id": "C"},
+    {"id": "D"}
+  ],
+  "links": [
+    {"source": "A", "target": "B", "value": 10},
+    {"source": "A", "target": "B", "value": 20},
+    {"source": "A", "target": "B", "value": 30},
+    {"source": "A", "target": "B", "value": 5},
+    {"source": "A", "target": "D", "value": 5},
+    {"source": "B", "target": "A", "value": 50},
+    {"source": "B", "target": "A", "value": 10},
+    {"source": "B", "target": "C", "value": 20},
+    {"source": "C", "target": "D", "value": 10}
+  ]
+}
