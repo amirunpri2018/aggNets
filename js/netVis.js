@@ -4,14 +4,14 @@ var svg = d3.select("body")
       .append("svg")
       .attr("width", 1000)
       .attr("height", 1000)
-  
-  
+
+
 var width = 1000;
 var height = 1000;
 
 var click = 0;
 var color = d3.scaleOrdinal(d3.schemeCategory20);
-var circleRadius = 8;
+var circleRadius = 10;
 var linkLength = 50;
 
 loadNodes();
@@ -39,7 +39,7 @@ function createLinks(data){
   var unique = _.groupBy(data, function(value) {
     return value.source + '#' + value.target;
   });
-  
+
   links = _.map(unique, function(group){
     var value = 0
     _.map(group, function(sub) {
@@ -50,9 +50,12 @@ function createLinks(data){
         target: group[0].target,
         value: value,
     }
-  });  
-  
+  });
+
+
   nodes = nodesData;
+  //console.log(nodes)
+
   drawGraph(nodes, links);
 }
 
@@ -61,53 +64,53 @@ function createSubGraph(sourceSelect, targetSelect){
   var subNodes = nodesData.filter(function(d) {
     return d.id == sourceSelect || d.id == targetSelect
   })
-  
+
   var subLinks = linksData.filter(function(d) {
     return (d.source == sourceSelect && d.target == targetSelect) || (d.source == targetSelect && d.target == sourceSelect)
   })
-    
-  
+
+
   drawGraph(subNodes, subLinks);
-  
+
 }
 
 function createSubGraphNodes(idSelect){
-  
+
   var subLinks = linksData.filter(function(d) {
     return d.source == idSelect || d.target == idSelect;
   })
-  
+
   var newNodes = [];
-  
+
   for(var i = 0; i < subLinks.length; i ++){
     if(!newNodes.contains(subLinks[i].source)){
       newNodes.push(subLinks[i].source)
     }
   }
-  
+
   for(var i = 0; i < subLinks.length; i ++){
     if(!newNodes.contains(subLinks[i].target)){
       newNodes.push(subLinks[i].target)
     }
   }
-  
+
   nodesFinal = [];
   newNodes.map(function(d){
     nodesFinal.push({id:d})
-  })      
-  
+  })
+
   drawGraph(nodesFinal, subLinks);
-  
+
 }
 
 
 
 
 function drawGraph(nodes, links){
-  
-  
+
+
   d3.selectAll('g').remove();
-  
+
   for (var i=0; i<links.length; i++) {
     if (i != 0 &&
         links[i].source == links[i-1].source &&
@@ -116,25 +119,25 @@ function drawGraph(nodes, links){
         }
     else {links[i].linknum = 1;};
   };
-  
+
   var simulation = d3.forceSimulation()
   .force("link", d3.forceLink().id(function(d) { return d.id; }))
   .force("charge", d3.forceManyBody())
   .force("center", d3.forceCenter(width / 2, height / 2))
   .force('collide', d3.forceCollide(40));
-  
-  
+
+
   var path = svg.append("svg:g").selectAll("path.link")
     .data(links)
   .enter().append("svg:path")
     .attr("class", function(d) { return "link"; })
     .attr("stroke-opacity", .5)
     .attr("stroke-width", function (d) {return Math.sqrt(d.value)/2})
-    .on('click', function(d) { 
+    .on('click', function(d) {
         createSubGraph(d.source.id, d.target.id)
     });
-    
-    
+
+
   var node = svg.append("g")
     .attr("class", "nodes")
     .selectAll("circle")
@@ -150,10 +153,10 @@ function drawGraph(nodes, links){
     .on('click', function(d){
       createSubGraphNodes(d.id);
     })
-          
+
   node.append("title")
   .text(function(d) { return d.id; });
-  
+
   svg.append("svg:defs").selectAll("marker")
     .data(["arrow"])
   .enter().append("svg:marker")
@@ -166,15 +169,15 @@ function drawGraph(nodes, links){
     .attr("orient", "auto")
   .append("svg:path")
     .attr("d", "M0,-5L5,0L0,5");
-  
-  
+
+
   var markerPath = svg.append("svg:g").selectAll("path.marker")
     .data(links)
   .enter().append("svg:path")
     .attr("class", function(d) { return "marker_only"; })
     .attr("stroke-opacity", 0)
     .attr("marker-end", function(d) { return "url(#arrow)"});
-    
+
   var text = svg.append("svg:g").selectAll("g")
   .data(nodes)
   .enter().append("svg:g");
@@ -186,29 +189,29 @@ function drawGraph(nodes, links){
       .attr("class", "shadow")
       .attr('font-size', '6pt')
       .text(function(d) { return d.id; });
-  
+
   text.append("svg:text")
       .attr("x", 8)
       .attr("y", ".31em")
       .attr('font-size', '6pt')
       .text(function(d) { return d.id; });
-          
+
   simulation
   .nodes(nodes)
   .on("tick", ticked);
-  
+
   simulation.force("link")
   .links(links)
   .distance(linkLength);
-  
-  
+
+
   function ticked() {
-    
-          
+
+
     node
     .attr("cx", function(d) { return d.x; })
     .attr("cy", function(d) { return d.y; });
-    
+
     text.attr("transform", function(d) {
       return "translate(" + (d.x+5) + "," + (d.y+10) + ")";
     });
@@ -218,18 +221,18 @@ function drawGraph(nodes, links){
     .attr("d", function(d) {
       var dx = d.target.x - d.source.x,
       dy = d.target.y - d.source.y,
-      dr = 250/d.linknum + 50;      
-      
+      dr = 250/d.linknum + 50;
+
       return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
     });
-    
-      
+
+
     markerPath
     .attr("d", function(d) {
       var dx = d.target.x - d.source.x,
       dy = d.target.y - d.source.y,
-      dr = 250/d.linknum + 50;      
-      
+      dr = 250/d.linknum + 50;
+
       return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
     });
 
@@ -245,14 +248,14 @@ function drawGraph(nodes, links){
     d.fx = d3.event.x;
     d.fy = d3.event.y;
   }
-  
+
   function dragended(d) {
     if (!d3.event.active) simulation.alphaTarget(0);
     d.fx = null;
     d.fy = null;
   }
-    
-  
+
+
 }
 
 
