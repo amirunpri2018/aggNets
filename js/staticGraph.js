@@ -14,6 +14,14 @@ readLinks()
 function readLinks(){
   d3.json('data/links.json', function(dat) {
     linksData = dat;
+
+    //for use in the lookup function
+    num = 0;
+    linksData.map(function(d){
+      d.linkID = num
+      num += 1
+    })
+
     readNodes();
   })
 }
@@ -26,7 +34,7 @@ function readNodes(){
 }
 
 function drawGraph(){
-  console.log(linksData)
+  //console.log(linksData)
   //console.log(nodesData)
 
   for (var i=0; i<linksData.length; i++) {
@@ -41,7 +49,7 @@ function drawGraph(){
   svg.selectAll("path")
       .data(linksData)
     .enter().append("path")
-    .attr("class", function(d) { return "link"; })
+    .attr("class", function(d) { return 'link'+d.linkID; })
     .attr("stroke-opacity", 0.5)
     .attr("stroke-width", function (d) {return Math.sqrt(d.value)/2})
     .attr("fill", "none")
@@ -54,23 +62,43 @@ function drawGraph(){
       return "M" + (d.sourceX*10+400) + "," + (d.sourceY*10+400) + "A" + dr + "," + dr + " 0 0,1 " + (d.targetX*10+400) + "," + (d.targetY*10+400);
     })
 
+
   svg.selectAll("circle")
     .data(nodesData)
   .enter().append("circle")
+    .attr('class', function(d) { return d.id.replace(/ /g,'').replace(/\./g,'')})
     .attr("fill", function(d) { return color(d.id); })
     .attr("cx", function(d) { return d.x*10 + 400; })
     .attr("cy", function(d) { return d.y*10 + 400; })
     .attr("r", 5)
     .on('mouseover', function(){
-      d3.select(this).transition().duration(250).attr("r",10)
+      findConnections(d3.select(this).attr("class"));
+
+      d3.selectAll('circle').attr('fill-opacity', 0.2);
+      for(i = 0; i < nodeNames.length; i++){
+        d3.select("."+nodeNames[i].replace(/ /g,'').replace(/\./g,'')).attr('fill-opacity', 1)
+      }
+
+      d3.selectAll('path').attr('stroke-opacity', 0);
+      for(i = 0; i < linkIDs.length; i++){
+        d3.select(".link"+linkIDs[i]).attr('stroke-opacity', 0.5)
+      }
+
+      d3.selectAll('text').attr('opacity', 0.2);
+      for(i = 0; i < nodeNames.length; i++){
+        d3.select("g."+nodeNames[i].replace(/ /g,'').replace(/\./g,'')).selectAll('text').attr('opacity', 1)
+      }
+
     })
     .on('mouseout', function(){
-      d3.select(this).transition().duration(250).attr("r",5)
+      d3.selectAll('path').attr("stroke-opacity", 0.5);
+      d3.selectAll('circle').attr("fill-opacity", 1);
+      d3.selectAll('text').attr('opacity', 1);
     });
 
   var text = svg.append("svg:g").selectAll("g")
   .data(nodesData)
-  .enter().append("svg:g");
+  .enter().append("svg:g").attr("class", function(d){return d.id.replace(/ /g,'').replace(/\./g,'')});
 
   text.append("svg:text")
       .attr("x", 8)
@@ -91,5 +119,27 @@ function drawGraph(){
         return "translate(" + (d.x*10+400) + "," + (d.y*10+405) + ")";
       });
 
+
+}
+
+function findConnections(d){
+  var selected = d;
+
+  //find links with association to selected team
+  subLinks = linksData.filter(function(el){
+    return el.source.replace(/ /g,'').replace(/\./g,'') == selected || el.target.replace(/ /g,'').replace(/\./g,'') == selected
+  })
+
+  linkIDs = []
+  subLinks.map(function(el){
+    linkIDs.push(el.linkID)
+  })
+
+  nodeNames = subLinks.map(function(el){
+    return el.target
+  })
+  subLinks.map(function(el){
+    nodeNames.push(el.source)
+  })
 
 }
